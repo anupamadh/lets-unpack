@@ -42,22 +42,18 @@ const concepts=[
         null
       ],
       [
-        "A developer wants the browser to talk directly to the database, so they put the database username and password in the frontend code. What can any visitor now do?",
+        "A shop app puts its database password inside the webpage code. The database holds the orders of 500 customers. A curious visitor copies the password and connects to the database. How many customers’ orders can they read?",
         [
-          "database"
+          "500",
+          "five hundred",
+          "all",
+          "all 500",
+          "everyone's",
+          "everyone",
+          "all of them"
         ],
-        "They copy the credentials from the frontend code. Only the backend should hold the database credentials.",
-        [
-          [
-            "database"
-          ],
-          [
-            "read",
-            "change",
-            "delete",
-            "access"
-          ]
-        ]
+        "The password works for whoever has it, so the visitor sees everything the app can see. Only the backend should hold the database password and hand each user only their own data.",
+        null
       ],
       [
         "A course app hides the “Download certificate” button in the browser unless user.paid === true. The certificate file is served from a public URL. A learner who hasn’t paid opens DevTools. They change one value in DevTools and the button appears. Which value do they change?",
@@ -76,16 +72,23 @@ const concepts=[
     "follow": "Imagine the receiver has never heard from your app before. What must this request include?",
     "cases": [
       [
-        "A chatbot sends only the user’s latest message in each API call. The user writes “My name is Priya.” In the next message, they ask “What’s my name?” What does the model reply, and why?",
+        "Priya tells a chatbot her name. For her next question, the app sends only “What is my name?” and leaves out her earlier message. Can the chatbot know her name from this new request alone?",
         [
+          "no",
+          "can't know",
+          "cannot know",
           "doesn't know",
-          "can't answer",
-          "no idea",
-          "won't know",
           "does not know",
-          "cannot answer"
+          "won't know",
+          "will not know",
+          "can't remember",
+          "cannot remember",
+          "not included",
+          "not sent",
+          "left out",
+          "leaves out"
         ],
-        "The second call didn’t include the first message, and the model keeps no memory between calls. Earlier messages have to be sent again in each call.",
+        "The new request does not include Priya’s name. The app must send the earlier message again for the chatbot to use it.",
         null
       ],
       [
@@ -99,38 +102,35 @@ const concepts=[
       [
         "A FastAPI server defines @app.post(\"/diagnose\"). A learner opens http://localhost:8000/diagnose in the browser address bar. What happens, and why?",
         [
-          "405"
+          "405",
+          "method not allowed"
         ],
-        "Typing a URL in the address bar sends a GET, but the endpoint only accepts POST.",
-        null
-      ],
-      [
-        "The same /diagnose endpoint expects {\"description\": \"...\"}. A client sends {\"desc\": \"API latency spiked\"}. What status code comes back, and why?",
+        "Typing a URL in the browser address bar sends GET, but /diagnose only accepts POST, so FastAPI responds with 405 Method Not Allowed.",
+        null,
         [
-          "422"
-        ],
-        "The required field description is missing from the body, so validation fails before your code runs.",
-        null
-      ],
-      [
-        "A developer sends the LLM their instructions (“Find the recited sentence, ask one follow-up”) in one API call. In a second call, they send the learner’s explanation on its own. What does the model do with the second call, and why?",
-        [
-          "ignores the instructions"
-        ],
-        "It responds to the explanation as plain input, because the second call didn’t include the instructions. Instructions and input have to go in the same call.",
-        [
-          [
-            "instructions"
-          ],
-          [
-            "ignore",
-            "ignores",
-            "doesn't follow",
-            "not included",
-            "forgot",
-            "not follow"
-          ]
+          "\\bget\\b.{0,35}\\b(?:instead of|rather than|not)\\b.{0,20}\\bpost\\b",
+          "\\b(?:sends?|sending|makes?|making|uses?|using)\\b.{0,20}\\bget\\b.{0,90}\\b(?:expects?|accepts?|requires?|only supports?)\\b.{0,20}\\bpost\\b"
         ]
+      ],
+      [
+        "A server expects a problem report in a field named \"description\". The app sends it in a field named \"desc\" instead. Which field name should the app use so the server can read the report?",
+        [
+          "description"
+        ],
+        "The field name must match what the server expects. Sending \"desc\" does not provide the required \"description\" field.",
+        null
+      ],
+      [
+        "An app wants an AI to translate “Hello” into Hindi. What should it send in one request: just “Hello”, or “Hello” together with the instruction “Translate into Hindi”?",
+        [
+          "both",
+          "together",
+          "sentence and the instruction",
+          "instruction and the sentence",
+          "hello and translate into hindi"
+        ],
+        "The AI needs both what to do and the text to do it to in the same request.",
+        null
       ]
     ]
   },
@@ -156,7 +156,7 @@ const concepts=[
           "app owner",
           "mine"
         ],
-        "The developer’s account is billed because the copied key identifies their account, even when someone else uses it.",
+        "The key isn’t tied to the app. The AI provider bills the key’s owner for every call made with it, from anywhere. That’s why the key must stay on the server.",
         null
       ],
       [
@@ -204,12 +204,13 @@ const concepts=[
         null
       ],
       [
-        "A FastAPI server stores attempts in a global variable, attempts = []. Ten learners submit attempts in the morning. At noon, the developer redeploys a small bug fix. How many attempts does GET /attempts return afterwards, and why?",
+        "An app saves 10 attempts in temporary memory. The server restarts. How many attempts remain?",
         [
           "0",
-          "zero"
+          "zero",
+          "none"
         ],
-        "The list was in the server’s RAM, and the redeploy started a fresh process. The attempts should have been written to a database.",
+        "Temporary memory is cleared when the server restarts. Save attempts in a database to keep them.",
         null
       ],
       [
@@ -222,22 +223,30 @@ const concepts=[
         null
       ],
       [
-        "A chat app saves every message to the database. When calling the LLM, it sends only the newest message. Earlier, the user said “I’m a beginner.” Now they ask “Explain APIs at my level.” How many of the user’s messages does the model receive in this call?",
+        "An app sends only the latest chat message to the AI. Can the AI see the earlier messages?",
         [
-          "1",
-          "one"
+          "no",
+          "cannot see",
+          "can't see",
+          "does not see",
+          "doesn't see",
+          "not sent",
+          "not included"
         ],
-        "Only the newest message was sent. The history was stored but not read back and included in the call, and the model keeps nothing between calls, so it never sees “I’m a beginner.” Storing it isn’t enough on its own; it has to be sent too.",
+        "The AI can only use the messages included in this request. Saving older messages does not automatically send them to the AI.",
         null
       ],
       [
-        "A notes app saves notes in localStorage. The user writes three notes, refreshes the page, then opens the same app in an Incognito window. How many notes do they see in the Incognito window?",
+        "You save three notes in your browser. Will they appear in a new Incognito window?",
         [
-          "0",
+          "no",
+          "will not",
+          "won't",
           "zero",
+          "0",
           "none"
         ],
-        "localStorage belongs to that one browser profile, and Incognito starts with empty storage. (After a normal refresh, all 3 notes are still there.)",
+        "A new Incognito session has separate browser storage, so it cannot read the notes saved in the normal browser.",
         null
       ]
     ]
@@ -255,21 +264,23 @@ const concepts=[
         null
       ],
       [
-        "A developer adds attempt_ids to learners and stores \"12,15,19\". Two of the same learner’s attempts are saved at almost the same moment. Each request reads \"12,15,19\", adds its own ID, and writes the list back. What does the cell contain afterwards, and why?",
+        "Two requests each add an ID to the same old list. The second save overwrites the first. How many new IDs survive?",
         [
           "1",
-          "one"
+          "one",
+          "only the second",
+          "only the last"
         ],
-        "The second write overwrote the first, because both requests rewrote the same cell. With attempts.learner_id, each attempt is its own row and nothing gets overwritten.",
+        "Only the ID added by the second request survives. Its save overwrites the first request’s version of the list.",
         null
       ],
       [
-        "A developer avoids a pointer and stores each attempt as a row in one big table with learner_name, learner_email, explanation. Learner Priya has 6 attempts. She changes her email, and the app updates only her latest row. How many different emails now show for Priya, and why?",
+        "Priya’s email appears in six records. Only one is updated with her new email. How many different emails are now stored?",
         [
           "2",
           "two"
         ],
-        "Her details were copied into all 6 rows, and only one was updated. With a separate learners table and attempts.learner_id, the email is stored once.",
+        "Five records still contain the old email, and one contains the new email: two different addresses.",
         null
       ],
       [
@@ -281,15 +292,16 @@ const concepts=[
         null
       ],
       [
-        "A course platform has students and courses. A student takes many courses, and a course has many students. Where does the pointer go, and why?",
+        "Students can join many courses. Courses can have many students. Should a separate table record who joined which course?",
         [
-          "third table",
+          "yes",
+          "separate table",
           "join table",
           "junction table",
           "enrollments",
           "student_courses"
         ],
-        "Both sides are “many,” so you’d get a list on both sides. A third table, enrollments(student_id, course_id), links one student to one course per row.",
+        "A separate table stores one student and one course per row. This supports many students joining many courses.",
         null
       ]
     ]
@@ -311,13 +323,11 @@ const concepts=[
         null
       ],
       [
-        "A delivery app has orders.status, updated from “placed” to “shipped” to “delivered.” A customer complains that their order took 4 days to ship. How many of the three statuses can support still see for this order?",
+        "An app keeps only the latest delivery status. After “placed”, “shipped”, and “delivered”, which status remains?",
         [
-          "1",
-          "one",
           "delivered"
         ],
-        "The cell only holds the latest status, and the earlier statuses and their times were overwritten. A status_events(order_id, status, created_at) table would show when each change happened.",
+        "Each new status replaces the previous one. Only delivered remains because no status history was saved.",
         null
       ],
       [
@@ -331,21 +341,21 @@ const concepts=[
         null
       ],
       [
-        "A shop stores the price only in products.price. Orders point to the product but don’t store a price. The price of a T-shirt goes from $20 to $25. A customer who bought it last month downloads their invoice. What price does the invoice show, and why?",
+        "A shirt cost $20 when bought and costs $25 now. An invoice uses today’s price. What price does it show?",
         [
           "25",
           "twenty five"
         ],
-        "The invoice reads the current cell, and the price at the time of purchase was never recorded. Each order row should store the price it was sold at.",
+        "The invoice reads today’s price of $25. The app would need to save the purchase price to show the original $20.",
         null
       ],
       [
-        "Concept Check stores learners.last_recited_sentence, overwritten each session. 30 learners have done 4 sessions each. You want to know which sentence learners recite most often across all sessions. How many sentences can you count, and why?",
+        "An app keeps one latest sentence per learner. With 30 learners, how many sentences are saved?",
         [
           "30",
           "thirty"
         ],
-        "One per learner. The other 90 were overwritten. With one row per attempt, all 120 can be grouped and counted.",
+        "There is one saved sentence for each of the 30 learners, so there are 30 sentences in total.",
         null
       ]
     ]
@@ -385,11 +395,15 @@ const concepts=[
         null
       ],
       [
-        "A developer adds a learner_email column to the attempts table, so every attempt row repeats the email. Where should the email live, and why?",
+        "Should a learner’s email be saved once in their learner record or repeated in every attempt?",
         [
-          "learners"
+          "once",
+          "learner record",
+          "learners record",
+          "learners table",
+          "learner table"
         ],
-        "Attempts point to it with learner_id. The email describes the learner, not the attempt; repeating it means one change has to be made in many rows. (The brief also says to keep names out of the shared view, so store as little as you can.)",
+        "The email describes the learner. Store it once in the learner record and link attempts using the learner ID.",
         null
       ],
       [
@@ -405,7 +419,7 @@ const concepts=[
 ];
 const $=s=>document.querySelector(s);let sessionVersion=0;let selected=2,stage=0,activeCase=0,results=[],transcript=[],records=[];const lastCases={};try{Object.assign(lastCases,JSON.parse(localStorage.getItem('concept-check-last-cases')||'{}'))}catch{}try{records=JSON.parse(localStorage.getItem('concept-check-attempts')||'[]');if(!Array.isArray(records))records=[]}catch{}const escape=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function normalizeAnswer(text){return text.toLowerCase().replace(/[’‘]/g,"'").replace(/[“”]/g,'').replace(/[-–—]/g,' ').replace(/\s+/g,' ').trim()}
-function gradeAnswer(test,text){const normalized=normalizeAnswer(text);const has=term=>{const escaped=normalizeAnswer(term).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return new RegExp('\\b'+escaped+'\\b','i').test(normalized)};return test[3]?test[3].every(group=>group.some(has)):test[1].some(has)}
+function gradeAnswer(test,text){const normalized=normalizeAnswer(text);const has=term=>{const escaped=normalizeAnswer(term).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return new RegExp('\\b'+escaped+'\\b','i').test(normalized)};return (test[3]?test[3].every(group=>group.some(has)):test[1].some(has))||Boolean(test[4]?.some(pattern=>new RegExp(pattern,'i').test(normalized)))}
 function message(text,user=false,highlight=false){const el=document.createElement('div');el.className='msg '+(user?'user':'');const who=document.createElement('div');who.className='who';who.textContent=user?'YOU':'LET’S UNPACK';const bubble=document.createElement('div');bubble.className='bubble';if(highlight){const a=document.createElement('span');a.textContent='A phrase to unpack: ';const mark=document.createElement('mark');mark.textContent=text;bubble.append(a,mark)}else bubble.textContent=text;el.append(who,bubble);$('#messages').append(el);$('#messages').scrollTop=$('#messages').scrollHeight;transcript.push({text,user});return bubble}
 function setStep(n){document.querySelectorAll('#steps li').forEach((x,i)=>x.classList.toggle('current',i===n))}
 function showPractice(){$('#workspace').hidden=false;$('#history-view').hidden=true;$('#learn').classList.add('active');$('#history').classList.remove('active');$('#breadcrumb').textContent='Concept practice'}
