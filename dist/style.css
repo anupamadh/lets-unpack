@@ -6,3 +6,11 @@
 .reveal-ideas{font-size:20px;line-height:1;margin:0 0 0 10px;padding:5px 12px;vertical-align:middle}
 
 .brand .light{margin-left:5px}
+
+/* Give the conversation the full workspace width and more writing room. */
+.work-grid{grid-template-columns:minmax(0,1fr)}
+.work-grid>.right{display:none}
+#messages{height:clamp(420px,55vh,720px)}
+#answer{min-height:110px;font-size:14px}
+.msg{font-size:14px}
+@media(max-width:650px){#messages{height:420px}#answer{min-height:96px}}

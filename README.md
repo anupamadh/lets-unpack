@@ -1,24 +1,15 @@
-# Let’s Unpack UI
+# Let’s Unpack
 
-A responsive, buildless chat UI based on the supplied high-level design, UI sketch, reference screenshots, and selected golden pairs.
+## Run locally
+Set GROQ_API_KEY, GROQ_MODEL, SUPABASE_URL, and SUPABASE_PUBLISHABLE_KEY in .env. Run `node server.mjs` and open http://127.0.0.1:4173. The default Groq model is openai/gpt-oss-120b. This integration has not been pushed or deployed.
 
-Add your Groq key to `.env` as `GROQ_API_KEY=...`, then run `node server.mjs` from this directory. Open http://127.0.0.1:4173. The server reads configuration on each request, so saving the key does not require a restart. Do not use a static file URL for the LLM flow.
+## Supabase flow
+Anonymous Supabase Auth sessions identify learners without a login form. The six tables are learners, concepts, case_questions, attempts, gaps, and retries. The latest seven concepts and 35 golden pairs are seeded. Schema and seed SQL are in supabase/.
 
-## Included
-- Seven concept choices
-- Explanation, highlighted phrase, Groq-generated follow-up, one case, and Pass / Not yet flow
-- Deterministic keyword checks for the included sample cases
-- Append-only attempt records in this browser's localStorage
-- Attempt history and repeat practice
-- Responsive desktop and mobile layout
+Groq marks an exact sentence and writes one follow-up. The learner reply is stored as a retry, a new case is selected, and database code grades the answer. Answer keys and grading rules are never sent to the frontend. All six tables have RLS. Learners can read only their own attempts. Direct answer-key reads and direct result writes are denied. Completed attempts cannot be overwritten through the API. Retries of a submitted request return the original result.
 
-## Scope
-The local Node server calls Groq to identify an exact sentence where the explanation becomes a phrase and generate one targeted follow-up. The key stays in `.env` outside the served `dist` directory, is ignored by Git, and is excluded from the downloadable archive. The backend validates the quoted text and question format. Provider failures offer a retry rather than a scripted fallback. An explanation that already explains the mechanism gets a transfer question without a fabricated highlight.
+Enable Allow anonymous sign-ins in the exact configured Supabase project, separately from general user sign-ups. This setting must be active before authenticated end-to-end testing can pass.
 
-This remains a prototype: pass/fail and sample answer keys still live in browser JavaScript; localStorage holds attempts. Move grading and keys to the server before using this for assessment. Real Groq calls need a valid configured key.
+History belongs to its anonymous browser session; clearing browser data loses that session. Previous browser-only history is preserved in its old localStorage key and is not automatically imported as verified database results.
 
-## Backend handoff
-Use server endpoints to create attempts, submit explanations, and submit case answers. The server should select cases and grade only answer_core with explicitly accepted wordings. Show answer_reason only after grading. An LLM may identify a recited sentence and write a follow-up, but must not decide pass/fail. Keep credentials and answer keys on the server. Persist learners, concepts, case_questions, attempts, gaps, and retries in separate tables with foreign keys on the many side, preserving every attempt. Replace browser-local records with learner-scoped server reads and writes.
-
-## Vercel
-Deploy this repository with the Other framework preset. `vercel.json` serves `dist` and builds the Node API routes in `api`. The server uses Vercel's existing `GROQ_API_KEY` environment variable. The model defaults to `openai/gpt-oss-120b`; `GROQ_MODEL` can override it. No local key is uploaded: `.vercelignore` excludes all `.env` files and `.gitignore` excludes the real `.env`. This deployment keeps attempt history in each browser; Supabase persistence is a separate integration.
+.env is excluded from Git, Vercel uploads, and the source archive. No Supabase service-role key is used. Do not publish local auth-session test files.
