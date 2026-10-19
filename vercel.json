@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "outputDirectory": "dist",
+  "buildCommand": "node --check dist/app.js",
+  "functions": {"api/*.mjs": {"maxDuration": 60}}
+}
