@@ -1,0 +1,7 @@
+{
+  "name": "lets-unpack",
+  "private": true,
+  "type": "module",
+  "scripts": {"start": "node server.mjs", "build": "node --check dist/app.js"},
+  "engines": {"node": "22.x"}
+}
