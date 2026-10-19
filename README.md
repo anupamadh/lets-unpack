@@ -19,3 +19,6 @@ This remains a prototype: pass/fail and sample answer keys still live in browser
 
 ## Backend handoff
 Use server endpoints to create attempts, submit explanations, and submit case answers. The server should select cases and grade only answer_core with explicitly accepted wordings. Show answer_reason only after grading. An LLM may identify a recited sentence and write a follow-up, but must not decide pass/fail. Keep credentials and answer keys on the server. Persist learners, concepts, case_questions, attempts, gaps, and retries in separate tables with foreign keys on the many side, preserving every attempt. Replace browser-local records with learner-scoped server reads and writes.
+
+## Vercel
+Deploy this repository with the Other framework preset. `vercel.json` serves `dist` and builds the Node API routes in `api`. The server uses Vercel's existing `GROQ_API_KEY` environment variable. The model defaults to `openai/gpt-oss-120b`; `GROQ_MODEL` can override it. No local key is uploaded: `.vercelignore` excludes all `.env` files and `.gitignore` excludes the real `.env`. This deployment keeps attempt history in each browser; Supabase persistence is a separate integration.
