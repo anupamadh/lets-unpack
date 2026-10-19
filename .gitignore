@@ -1,0 +1,13 @@
+# Local credentials and environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Hosting metadata and local tooling
+.vercel/
+.openai/
+node_modules/
+*.log
+.DS_Store
