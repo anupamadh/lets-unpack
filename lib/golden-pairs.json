@@ -172,8 +172,14 @@
         "A key was in the frontend for a week. The developer removes it from the code and redeploys. Two days later, the provider dashboard still shows usage the app didn’t make. Why, and what should they have done?",
         [
           "revoke",
+          "revoked",
+          "revoking",
           "rotate",
+          "rotated",
+          "rotating",
           "regenerate",
+          "regenerated",
+          "regenerating",
           "new key"
         ],
         "Someone copied the key while it was exposed, and it’s still valid. The new key should live only on the backend.",
@@ -311,15 +317,12 @@
     "follow": "If you overwrite a result, how can you show what happened before?",
     "cases": [
       [
-        "Concept Check stores learners.last_case_result, updated after each new case. A learner fails the first case, gets the follow-up, then passes the second case. A reviewer asks for proof of “failed before, passed after.” What can the database show, and why?",
+        "Concept Check stores learners.last_case_result, updated after each new case. A learner fails the first case, gets the follow-up, then passes the second case. How many case results can the database show?",
         [
           "1",
-          "one",
-          "only passed",
-          "only the passed",
-          "only pass"
+          "one"
         ],
-        "The fail was overwritten. With one row per attempt in attempts, both results are kept with their times.",
+        "Only the latest result is stored: the second case’s pass overwrote the first case’s fail.",
         null
       ],
       [
@@ -368,9 +371,12 @@
         "In Concept Check, each new case has a known answer. A developer sends the case and its answer to the browser, so the browser can show “Correct!” instantly. Where should the answer live, and why?",
         [
           "server",
-          "backend"
+          "backend",
+          "database",
+          "private database",
+          "db"
         ],
-        "The learner could read it in DevTools before answering. The browser sends the learner’s answer, and the server checks it.",
+        "The answer key can be stored on the backend or in a private database that only backend grading code can read. Learners must not receive it in the browser, where it could be inspected in DevTools. The browser sends the learner’s answer for grading.",
         null
       ],
       [

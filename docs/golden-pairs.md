@@ -140,7 +140,7 @@ A key was in the frontend for a week. The developer removes it from the code and
 
 **Explanation:** Someone copied the key while it was exposed, and it’s still valid. The new key should live only on the backend.
 
-⚠ Grading note: Accept: “revoke”, “rotate”, “regenerate”, “new key”. “Remove it from the code” alone fails.
+⚠ Grading note: Accept: “revoke”, “revoked”, “revoking”, “rotate”, “rotated”, “rotating”, “regenerate”, “regenerated”, “regenerating”, “new key”. “Remove it from the code” alone fails.
 
 ### 15 Backend proxy
 
@@ -256,13 +256,13 @@ Grading note: Accept “yes”, “separate table”, “join table”, “junct
 
 ### 26 Losing the before (your proof)
 
-Concept Check stores learners.last_case_result, updated after each new case. A learner fails the first case, gets the follow-up, then passes the second case. A reviewer asks for proof of “failed before, passed after.” What can the database show, and why?
+Concept Check stores learners.last_case_result, updated after each new case. A learner fails the first case, gets the follow-up, then passes the second case. How many case results can the database show?
 
-**Expected answer:** only “passed” (1 result)
+**Expected answer:** 1
 
-**Explanation:** The fail was overwritten. With one row per attempt in attempts, both results are kept with their times.
+**Explanation:** Only the latest result is stored: the second case’s pass overwrote the first case’s fail.
 
-⚠ Grading note: Tightened: to grade by code, change the case question to “How many case results can the database show?” → core: 1.
+Grading note: Accept “1” or “one”.
 
 ### 27 Losing the when
 
@@ -304,13 +304,15 @@ Grading note: Accept “30”, “thirty”. Grade the answer to this revised qu
 
 ## How do you decide where a piece lives?
 
-### 31 Trust → server
+### 31 Trust → backend or private database
 
 In Concept Check, each new case has a known answer. A developer sends the case and its answer to the browser, so the browser can show “Correct!” instantly. Where should the answer live, and why?
 
-**Expected answer:** on the server, never sent to the browser
+**Expected answer:** on the backend, or in a private database accessible only to the backend; never sent to the browser
 
-**Explanation:** The learner could read it in DevTools before answering. The browser sends the learner’s answer, and the server checks it.
+**Explanation:** The answer key can be stored on the backend or in a private database that only backend grading code can read. Learners must not receive it in the browser, where it could be inspected in DevTools. The browser sends the learner’s answer for grading.
+
+**Accepted answers:** server, backend, database, private database, DB.
 
 ### 32 Fixed rule → code, not AI
 

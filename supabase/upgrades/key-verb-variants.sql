@@ -1,0 +1,1 @@
+update public.case_questions set aliases='["revoke", "revoked", "revoking", "rotate", "rotated", "rotating", "regenerate", "regenerated", "regenerating", "new key"]'::jsonb where id=14 and concept_id=3;
