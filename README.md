@@ -16,3 +16,9 @@ History belongs to its anonymous browser session; clearing browser data loses th
 
 ## Before and after questions
 For an existing database, apply `supabase/upgrades/before-follow-up.sql` once before deploying the updated API. Fresh databases use `supabase/schema.sql` (which includes the upgrade) and then `supabase/seed.sql`. Run `node tests/before-after.mjs` against the local app, or set `TEST_BASE_URL` for a deployed app. The test creates synthetic learner attempts and writes `outputs/before-after-verification.md`. It checks stage order, different questions, idempotence, grading, private history, and learner isolation.
+
+## Explain an unfamiliar idea
+The opening message offers an explanation. Learners can select “I don’t understand — explain it” or type requests such as “I don’t understand”, “I don’t know”, or “please explain”. The `/api/explain` endpoint returns a concept explanation based on the golden-pairs document and a short everyday example. It does not create or grade an attempt. The learner then explains in their own words before starting Case 1. Explanations are stored in `lib/concept-lessons.json`; case prompts and answer keys are not returned by this endpoint.
+
+## Final explanations
+After Case 2, the chat reviews Case 1, the follow-up reply, and Case 2. Case explanations use the golden-pair reasons and saved code-based grades. Groq provides descriptive follow-up feedback without scoring understanding or altering case grades; it is saved once in `gaps.feedback`. If feedback generation fails, both case results remain visible and a retry fetches just the missing feedback. Past-attempt cards remain summaries without answers. Existing databases apply `supabase/upgrades/final-review.sql` once.

@@ -1,0 +1,48 @@
+# Concept explanations
+
+Based on the seven concept-level answers in the golden-pairs document:
+https://docs.google.com/document/d/1LtEgkHHOeXF0mNJZQPQyqfSsEM7VKxIdma8D25iv95w
+
+These learner-facing explanations are separate from private case answer keys. The everyday examples illustrate the document’s explanations.
+
+## Why does a backend exist at all?
+
+The browser runs on the user's computer, so the user can inspect and change what happens there. A backend runs on a server outside the user's control. It keeps secrets, checks rules, and connects to the database. It can also give different users access to the same shared data.
+
+Example: Think of a shared shopping list: each person sees the list in their browser, while the backend saves changes in one shared place so everyone can see the updates.
+
+## What does one API call carry?
+
+An API call is a request from one program to another. It identifies where the request is going, what action is needed, and the data needed for that action. It may also include credentials to identify the caller. An LLM call must include the instructions, the user's message, and any earlier context the model needs; previous calls are not automatically remembered.
+
+Example: It is like sending a complete order to a shop: say which shop, what you want, and the details needed to fulfil it. You cannot assume the shop knows details you left out of this order.
+
+## Why can’t the key live in the browser?
+
+Anything sent to the browser can be inspected by its user. If an API key is there, someone can copy it and use it outside your app. The provider treats whoever has the key as an authorised caller, so their requests can use your account's credits. Keep the key on the backend and let the browser ask the backend to call the API.
+
+Example: An API key is like a key to a paid service. Handing a copy to every visitor means they can use that service themselves, while you receive the bill.
+
+## Why does the app forget without storage?
+
+Temporary variables live in memory. When the page reloads or the server process restarts, that temporary memory is replaced. To remember something later, the app must save it in persistent storage, such as a database, and read it back. Saving chat history is also separate from sending that history to the LLM when it needs context.
+
+Example: Temporary memory is like a whiteboard that gets wiped when you leave. A database is like a notebook you can reopen later.
+
+## Why does the pointer sit on the many side?
+
+In a one-to-many relationship, each item on the many side belongs to one item on the other side. Put that item's ID in each of the many rows. Each attempt can store one learner_id. The learner does not need an ever-growing list of attempt IDs in one cell; a new attempt simply adds another row.
+
+Example: One library member can borrow many books. Each loan record points to its one member, so adding a loan does not require rewriting a list inside the member's record.
+
+## Why is history a row, not a cell?
+
+Updating one cell replaces the old value. If you need to show what happened over time, save each event or attempt as a new row with its time instead. That lets you compare earlier and later results without losing the earlier ones.
+
+Example: A diary keeps a separate dated entry for each day. Replacing yesterday's entry with today's would lose the history.
+
+## How do you decide where a piece lives?
+
+Ask who should be allowed to see or change the data, and whether it must survive for later use. Sensitive data and trusted decisions belong behind the backend. Data needed later or by other people belongs in a database, with appropriate access controls. Fixed rules belong in code; AI can help with language and judgment. Store each fact with the thing it describes, rather than repeating it everywhere.
+
+Example: A learner's email belongs in the learner record. Each attempt points to that learner. A private answer key can live in a database that backend grading code can read, without being sent to the browser.

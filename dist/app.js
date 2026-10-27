@@ -12,14 +12,30 @@ function setStep(n){document.querySelectorAll('#steps li').forEach((el,i)=>el.cl
 function inputEnabled(enabled,placeholder){$('#answer').disabled=!enabled;$('#send').disabled=!enabled;if(placeholder)$('#answer').placeholder=placeholder}
 function showPractice(){$('#workspace').hidden=false;$('#history-view').hidden=true;$('#learn').classList.add('active');$('#history').classList.remove('active');$('#breadcrumb').textContent='Concept practice'}
 function listIdeas(initial=false){version++;stage=-1;selected=-1;attemptId=null;$('#answer').value='';inputEnabled(false,'Choose an idea above to begin…');setStep(-1);document.querySelectorAll('.concept').forEach(el=>el.classList.remove('selected'));if(initial){showPractice();$('#messages').replaceChildren()}const bubble=message(initial?'Let’s explore an idea together.\n\nChoose an idea to explain in your own words:':'What would you like to explore next?');const choices=document.createElement('div');choices.className='idea-choices';concepts.forEach((c,i)=>{const b=document.createElement('button');b.type='button';b.className='chip idea-choice';b.textContent=(i+1)+'. '+c.title;b.onclick=()=>start(i);choices.append(b)});if(initial){bubble.append(choices);$('#messages').scrollTop=0}else{const b=document.createElement('button');b.type='button';b.className='chip reveal-ideas';b.textContent='→';b.setAttribute('aria-label','Show all concepts');b.setAttribute('aria-expanded','false');b.onclick=()=>{bubble.append(choices);b.remove();$('#messages').scrollTop=$('#messages').scrollHeight};bubble.append(b)}}
-function start(i){version++;selected=i;stage=0;attemptId=crypto.randomUUID();showPractice();$('#messages').replaceChildren();$('#answer').value='';inputEnabled(true,'Explain it in your own words…');setStep(0);document.querySelectorAll('.concept').forEach((el,j)=>el.classList.toggle('selected',i===j));message('Let’s explore an idea together.\n\n'+concepts[i].title+'\n\nExplain it as if you were talking to a friend. An example can help.')}
+function start(i){version++;selected=i;stage=0;attemptId=crypto.randomUUID();showPractice();$('#messages').replaceChildren();$('#answer').value='';inputEnabled(true,'Explain it in your own words…');setStep(0);document.querySelectorAll('.concept').forEach((el,j)=>el.classList.toggle('selected',i===j));message('Let’s explore an idea together.\n\n'+concepts[i].title+'\n\nExplain it as if you were talking to a friend if you understand the idea. An example can help.\nOtherwise tell me and I’ll explain.');const help=document.createElement('button');help.type='button';help.className='chip';help.textContent='I don’t understand — explain it';const startedVersion=version;help.onclick=()=>{if(stage!==0||version!==startedVersion)return;help.disabled=true;message('I don’t understand the idea.',true);explainIdea()};$('#messages').lastElementChild.querySelector('.bubble').append(document.createElement('br'),help)}
 async function pending(label,operation,onSuccess,currentVersion=version){stage=-2;inputEnabled(false);const loading=message(label);try{const result=await operation();if(currentVersion!==version)return;loading.parentElement.remove();onSuccess(result)}catch(error){if(currentVersion!==version)return;loading.textContent=error.message;const retry=document.createElement('button');retry.type='button';retry.className='chip';retry.textContent='Retry ↗';retry.onclick=()=>{loading.parentElement.remove();pending(label,operation,onSuccess,currentVersion)};loading.append(document.createElement('br'),retry)}}
 function stageMessage(label,text){const bubble=message('');const heading=document.createElement('strong');heading.className='stage-title';heading.textContent=label;bubble.append(heading,document.createTextNode(text));return bubble}
+function needsExplanation(text){const s=text.toLowerCase().replace(/[’‘]/g,"'").trim();return /^(?:(?:i\s+)?(?:don't|dont|do not|cannot|can't|cant)\s+(?:really\s+)?(?:understand|know|get|follow)\b|(?:i(?:'m| am)\s+)?(?:not sure|confused|unsure)\b|(?:i have\s+)?no idea\b|idk\b|explain\b|please\s+(?:explain|help)\b|(?:can|could|would)\s+(?:you|u)\s+explain\b|what does (?:it|this|that) mean\b|help(?: me)?[.!?]*$)/i.test(s)}
+function explainIdea(){const concept=concepts[selected];pending('Let’s unpack the idea…',()=>api('explain',{concept_id:concept.id}),lesson=>{stageMessage('Let’s understand the idea',lesson.explanation+'\n\nFor example: '+lesson.example);message('When you’re ready, explain the idea in your own words. Then we’ll try Case 1.');stage=0;inputEnabled(true,'Tell me what the idea means in your own words…');setStep(0);$('#answer').focus()})}
 function showFollowUp(data){if(data.sentence)message(data.sentence,false,true);stageMessage('Follow up',data.follow_up);stage=1;inputEnabled(true,'Unpack your thinking…');setStep(1);$('#answer').focus()}
+function caseFeedback(result,label){stageMessage(label+' — '+(result.pass?'Pass':'Not yet'),'Question: '+result.case+'\n\nYour answer: '+result.answer+'\n\n'+(result.pass?'Why it passed: Your answer matched the expected outcome. ':'Why it was marked Not yet: Your answer did not match the expected outcome. ')+result.reason)}
+function followFeedback(bubble,record){
+ const follow=record.follow_up;const heading=document.createElement('strong');heading.className='stage-title';heading.textContent='Follow up — feedback';
+ bubble.replaceChildren(heading,document.createTextNode('Question: '+follow.question+'\n\nYour answer: '+follow.answer+'\n\n'+(follow.feedback||follow.feedback_error||'No feedback is available.')));
+ if(follow.feedback_error){const retry=document.createElement('button');retry.type='button';retry.className='chip';retry.textContent='Retry follow-up feedback';retry.onclick=async()=>{retry.disabled=true;retry.textContent='Loading feedback…';try{const updated=await api('review',{attempt_id:record.id});if(bubble.isConnected)followFeedback(bubble,updated)}catch(error){if(!bubble.isConnected)return;retry.disabled=false;retry.textContent='Retry follow-up feedback';}};bubble.append(document.createElement('br'),retry)}
+}
+function showFinalReview(record){
+ const before=record.results.find(r=>r.phase==='before'),after=record.results.find(r=>r.phase==='after')||record.results[record.results.length-1];
+ if(typeof record.before_passed==='boolean')stageMessage('Your results','Case 1: '+(record.before_passed?'Pass':'Not yet')+'\nCase 2: '+(record.passed?'Pass':'Not yet')+(record.improved?'\nYou moved from Not yet to Pass on a different question.':''));
+ if(before)caseFeedback(before,'Case 1');
+ if(record.follow_up?.answer)followFeedback(message(''),record);
+ caseFeedback(after,'Case 2');
+}
 $('#form').onsubmit=e=>{
  e.preventDefault();const answer=$('#answer').value.trim();if(stage<0||!answer)return;
  const currentStage=stage,currentId=attemptId,concept=concepts[selected];message(answer,true);$('#answer').value='';
  if(currentStage===0){
+  if(needsExplanation(answer)){explainIdea();return}
   initialExplanation=answer;
   pending('Finding a question to start with…',()=>api('begin-case',{attempt_id:currentId,concept_id:concept.id,explanation:answer}),data=>{
    stageMessage('Case 1','Before we unpack your explanation, try this situation.\n\n'+data.prompt);stage=3;inputEnabled(true,'What happens, and why?');setStep(0);
@@ -33,9 +49,7 @@ $('#form').onsubmit=e=>{
   pending('Finding a different situation…',()=>api('next-case',{attempt_id:currentId,answer}),data=>{stageMessage('Case 2','Now try a different situation using the same idea.\n\n'+data.prompt);stage=2;inputEnabled(true,'What happens, and why?');setStep(2)});
  }else if(currentStage===2){
   pending('Checking your answer…',()=>api('grade',{attempt_id:currentId,answer}),record=>{
-   const result=record.results.find(r=>r.phase==='after')||record.results[record.results.length-1];
-   message((record.passed?'✓ Case 2 result: PASS — your answer matched.':'↗ Case 2 result: NOT YET — there’s more to explore.')+'\n\n'+result.reason);
-   if(typeof record.before_passed==='boolean')message('Case 1 (before follow-up): '+(record.before_passed?'Pass':'Not yet')+'\nCase 2 (after follow-up): '+(record.passed?'Pass':'Not yet')+(record.improved?'\nYou moved from Not yet to Pass on a different question.':''));
+   showFinalReview(record);
    records=[record,...records.filter(r=>r.id!==record.id)];$('#count').textContent=records.length;listIdeas();
   });
  }
