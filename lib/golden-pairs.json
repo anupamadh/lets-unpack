@@ -141,11 +141,11 @@
       [
         "A developer minifies and obfuscates their React bundle so the key looks like random characters spread across the file. A visitor opens the Network tab and sends one chat message. In which part of the request can they read the key in plain text?",
         [
-          "authorization",
-          "header",
-          "headers"
+          "authorization header",
+          "request header",
+          "request headers"
         ],
-        "The key has to be sent in usable form in the request’s Authorization header, so it shows up in plain text in the Network tab whatever the bundle looks like.",
+        "The key is visible in the outgoing request’s Authorization header. Response headers are sent back by the server and are not where this request sends the key. Minifying or obfuscating the bundle does not hide the key when it is sent.",
         null
       ],
       [

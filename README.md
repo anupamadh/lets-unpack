@@ -22,3 +22,9 @@ The opening message offers an explanation. Learners can select “I don’t unde
 
 ## Final explanations
 After Case 2, the chat reviews Case 1, the follow-up reply, and Case 2. Case explanations use the golden-pair reasons and saved code-based grades. Groq provides descriptive follow-up feedback without scoring understanding or altering case grades; it is saved once in `gaps.feedback`. If feedback generation fails, both case results remain visible and a retry fetches just the missing feedback. Past-attempt cards remain summaries without answers. Existing databases apply `supabase/upgrades/final-review.sql` once.
+
+## End after a first-case pass
+A Case 1 pass ends the session immediately with results first and the Case 1 explanation. Only a failed Case 1 proceeds to the recited phrase, follow-up, and different Case 2. Apply `supabase/upgrades/end-after-first-pass.sql` for existing databases. `completed_after_first` distinguishes these sessions; legacy completion columns mirror Case 1 for existing history compatibility, while the review returns only one case. Existing completed sessions are unchanged. Run `node tests/first-case-pass.mjs` and `node tests/before-after.mjs` locally.
+
+## Gap closure in history
+Apply `supabase/upgrades/gap-closure.sql`. The stored generated `attempts.gap_closed` value is true only for a failed Case 1 followed by a pass on a different Case 2. A failed Case 2 leaves the gap open; a Case 1 pass shows No gap identified. Legacy attempts without a baseline show Gap status unavailable. History returns only summary fields and gap status, never learner answers or answer keys.

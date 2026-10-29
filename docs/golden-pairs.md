@@ -106,11 +106,11 @@ Grading note: Accept “both”, “together”, “the sentence and the instruc
 
 A developer minifies and obfuscates their React bundle so the key looks like random characters spread across the file. A visitor opens the Network tab and sends one chat message. In which part of the request can they read the key in plain text?
 
-**Expected answer:** the Authorization header
+**Expected answer:** the outgoing request’s Authorization header
 
-**Explanation:** The key has to be sent in usable form in the request’s Authorization header, so it shows up in plain text in the Network tab whatever the bundle looks like.
+**Explanation:** The key is visible in the outgoing request’s Authorization header. Response headers are sent back by the server and are not where this request sends the key. Minifying or obfuscating the bundle does not hide the key when it is sent.
 
-⚠ Grading note: Accept: “Authorization”, “header”, “request headers”.
+⚠ Grading note: Accept: “Authorization header”, “request header”, “request headers”. Reject: “response header”, “response headers”, and bare “header” or “headers”.
 
 ### 12 Whoever holds the key, you pay
 
@@ -349,3 +349,4 @@ The list of 7 ideas and the answer key are both fixed lists shipped in code. The
 **Expected answer:** the answer key
 
 **Explanation:** Learners need to see the ideas list to pick one. Seeing the answer key lets them pass without reasoning. The same kind of data goes in different places because of one question: can the user be trusted to see it?
+

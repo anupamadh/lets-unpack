@@ -25,12 +25,14 @@ function followFeedback(bubble,record){
  if(follow.feedback_error){const retry=document.createElement('button');retry.type='button';retry.className='chip';retry.textContent='Retry follow-up feedback';retry.onclick=async()=>{retry.disabled=true;retry.textContent='Loading feedback…';try{const updated=await api('review',{attempt_id:record.id});if(bubble.isConnected)followFeedback(bubble,updated)}catch(error){if(!bubble.isConnected)return;retry.disabled=false;retry.textContent='Retry follow-up feedback';}};bubble.append(document.createElement('br'),retry)}
 }
 function showFinalReview(record){
- const before=record.results.find(r=>r.phase==='before'),after=record.results.find(r=>r.phase==='after')||record.results[record.results.length-1];
+ const before=record.results.find(r=>r.phase==='before'),after=record.results.find(r=>r.phase==='after');
+ if(record.completed_after_first){stageMessage('Your results','Case 1: Pass\nYou applied the idea successfully. No follow-up is needed.');caseFeedback(before,'Case 1');return;}
  if(typeof record.before_passed==='boolean')stageMessage('Your results','Case 1: '+(record.before_passed?'Pass':'Not yet')+'\nCase 2: '+(record.passed?'Pass':'Not yet')+(record.improved?'\nYou moved from Not yet to Pass on a different question.':''));
  if(before)caseFeedback(before,'Case 1');
  if(record.follow_up?.answer)followFeedback(message(''),record);
- caseFeedback(after,'Case 2');
+ if(after)caseFeedback(after,'Case 2');
 }
+function finishSession(record){showFinalReview(record);records=[record,...records.filter(r=>r.id!==record.id)];$('#count').textContent=records.length;listIdeas()}
 $('#form').onsubmit=e=>{
  e.preventDefault();const answer=$('#answer').value.trim();if(stage<0||!answer)return;
  const currentStage=stage,currentId=attemptId,concept=concepts[selected];message(answer,true);$('#answer').value='';
@@ -42,21 +44,21 @@ $('#form').onsubmit=e=>{
   });
  }else if(currentStage===3){
   const explanation=initialExplanation;
-  pending('Saving your first answer…',()=>api('before-grade',{attempt_id:currentId,answer}),()=>{
+  pending('Saving your first answer…',()=>api('before-grade',{attempt_id:currentId,answer}),data=>{
+   if(data.completed){finishSession(data.record);return;}
    pending('Reading your explanation…',()=>api('follow-up',{attempt_id:currentId,concept_id:concept.id,explanation}),showFollowUp);
   });
  }else if(currentStage===1){
   pending('Finding a different situation…',()=>api('next-case',{attempt_id:currentId,answer}),data=>{stageMessage('Case 2','Now try a different situation using the same idea.\n\n'+data.prompt);stage=2;inputEnabled(true,'What happens, and why?');setStep(2)});
  }else if(currentStage===2){
   pending('Checking your answer…',()=>api('grade',{attempt_id:currentId,answer}),record=>{
-   showFinalReview(record);
-   records=[record,...records.filter(r=>r.id!==record.id)];$('#count').textContent=records.length;listIdeas();
+   finishSession(record);
   });
  }
 };
 $('#answer').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#form').requestSubmit()}};
 $('#new').onclick=()=>concepts.length?listIdeas(true):initialize();$('#learn').onclick=showPractice;
-function renderHistory(){const list=$('#history-list');list.replaceChildren();if(!records.length){list.textContent='Your first attempt is waiting. Pick a concept to begin.';return}records.forEach(record=>{const el=document.createElement('article');el.className='history-card';const title=document.createElement('h3');title.textContent=record.concept;const sub=document.createElement('small');sub.textContent=new Date(record.date).toLocaleString()+' · '+(record.passed?'Pass':'Not yet');el.append(title,sub);const btn=document.createElement('button');btn.textContent='Practice again ↗';btn.onclick=()=>start(concepts.findIndex(c=>c.title===record.concept));el.append(btn);list.append(el)})}
+function renderHistory(){const list=$('#history-list');list.replaceChildren();if(!records.length){list.textContent='Your first attempt is waiting. Pick a concept to begin.';return}records.forEach(record=>{const el=document.createElement('article');el.className='history-card';const title=document.createElement('h3');title.textContent=record.concept;const sub=document.createElement('small');sub.textContent=new Date(record.date).toLocaleString()+' · '+(record.passed?'Pass':'Not yet');el.append(title,sub);const gap=document.createElement('p');gap.className='gap-status';const labels={closed:'Gap closed · Case 1 not yet → Case 2 pass',open:'Gap not closed · Keep practising',not_needed:'No gap identified · Case 1 passed',unknown:'Gap status unavailable · No first-case result saved'};gap.textContent=labels[record.gap_status]||labels.unknown;el.append(gap);const btn=document.createElement('button');btn.textContent='Practice again ↗';btn.onclick=()=>start(concepts.findIndex(c=>c.title===record.concept));el.append(btn);list.append(el)})}
 $('#history').onclick=async()=>{$('#workspace').hidden=true;$('#history-view').hidden=false;$('#history').classList.add('active');$('#learn').classList.remove('active');$('#breadcrumb').textContent='My attempts';$('#history-list').textContent='Loading your saved attempts…';try{records=await api('history');$('#count').textContent=records.length;renderHistory()}catch(error){$('#history-list').textContent=error.message;const b=document.createElement('button');b.textContent='Retry';b.onclick=()=>$('#history').onclick();$('#history-list').append(b)}};
 async function initialize(){showPractice();inputEnabled(false,'Connecting your learner session…');$('#messages').replaceChildren();message('Connecting to your learning space…');try{concepts=await api('concepts');records=await api('history');$('#concepts').replaceChildren();concepts.forEach((c,i)=>{const b=document.createElement('button');b.className='concept';const n=document.createElement('b');n.textContent=String(i+1).padStart(2,'0');const title=document.createElement('span');title.textContent=c.title;b.append(n,title);b.onclick=()=>start(i);$('#concepts').append(b)});$('#count').textContent=records.length;listIdeas(true)}catch(error){$('#messages').replaceChildren();const bubble=message(error.message);const b=document.createElement('button');b.className='chip';b.textContent='Retry connection ↗';b.onclick=initialize;bubble.append(document.createElement('br'),b)}}
 initialize();

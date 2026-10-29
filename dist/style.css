@@ -16,3 +16,5 @@
 @media(max-width:650px){#messages{height:420px}#answer{min-height:96px}}
 
 .stage-title{display:block;font-size:15px;font-weight:700;color:var(--accent);margin-bottom:10px}
+
+.gap-status{font-size:13px;color:var(--accent);margin:14px 0;line-height:1.6}
